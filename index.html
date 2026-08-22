@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EEF1F6">
+<title>Standup — inglés para trabajo remoto</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{
+  --paper:#EEF1F6;
+  --surface:#FFFFFF;
+  --ink:#0F1620;
+  --muted:#5C6A7C;
+  --line:#DCE2EB;
+  --violet:#4B2FD6;
+  --violet-soft:#EDE9FE;
+  --green:#0B6E4F;
+  --green-soft:#E3F2EC;
+  --amber:#E8A317;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Roboto Mono",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.55;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.wrap{max-width:600px;margin:0 auto;padding:0 18px 64px}
+
+/* ---------- barra superior ---------- */
+.top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 0 14px;position:sticky;top:0;background:var(--paper);z-index:5;
+}
+.brand{font-family:var(--mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.brand b{color:var(--ink);font-weight:600}
+.streak{
+  display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:13px;
+  background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 11px;
+}
+.streak span{color:var(--amber);font-size:14px}
+
+/* ---------- progreso ---------- */
+.bar{height:3px;background:var(--line);border-radius:2px;overflow:hidden;margin-bottom:26px}
+.bar i{display:block;height:100%;background:var(--violet);width:0;transition:width .45s cubic-bezier(.4,0,.2,1)}
+
+/* ---------- tarjeta ---------- */
+.card{animation:rise .35s cubic-bezier(.2,.7,.3,1)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.eyebrow{
+  font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px;display:flex;gap:10px;align-items:center;
+}
+.eyebrow em{font-style:normal;color:var(--violet);font-weight:600}
+.scene{font-size:17px;line-height:1.5;margin:0 0 16px}
+
+/* mensaje entrante: el mundo del usuario es Slack */
+.msg{
+  background:var(--surface);border:1px solid var(--line);border-radius:4px 14px 14px 14px;
+  padding:14px 16px;margin-bottom:20px;
+}
+.msg .who{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:.08em}
+.msg p{margin:0;font-family:var(--mono);font-size:15px;line-height:1.5}
+
+.task{font-size:15px;color:var(--muted);margin:0 0 10px}
+
+textarea{
+  width:100%;min-height:104px;resize:vertical;
+  font-family:var(--mono);font-size:15px;line-height:1.5;color:var(--ink);
+  background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 14px;
+}
+textarea:focus{outline:2px solid var(--violet);outline-offset:1px;border-color:transparent}
+textarea::placeholder{color:#A9B3C0}
+
+/* ---------- el diff: elemento firma ---------- */
+.diff{margin-top:22px;animation:rise .3s cubic-bezier(.2,.7,.3,1)}
+.side{border-left:3px solid var(--line);padding:2px 0 2px 14px;margin-bottom:18px}
+.side .tag{
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:5px;
+}
+.side .body{font-family:var(--mono);font-size:15px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.side.mine{border-left-color:var(--violet)}
+.side.mine .tag{color:var(--violet)}
+.side.mine .body{color:var(--muted)}
+.side.native{border-left-color:var(--green);background:var(--green-soft);border-radius:0 8px 8px 0;padding:12px 14px}
+.side.native .tag{color:var(--green)}
+
+.why{margin:0 0 18px}
+.why h4{
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 6px;font-weight:500;
+}
+.why p{margin:0;font-size:15.5px;line-height:1.55}
+.why code{font-family:var(--mono);font-size:14px;background:var(--violet-soft);padding:1px 5px;border-radius:4px}
+
+.chunk{
+  display:flex;align-items:center;gap:12px;
+  background:var(--ink);color:#fff;border-radius:12px;padding:13px 15px;margin-bottom:22px;
+}
+.chunk .t{flex:1;font-family:var(--mono);font-size:14.5px;line-height:1.45}
+.chunk button{
+  flex:none;width:38px;height:38px;border-radius:50%;border:0;cursor:pointer;
+  background:rgba(255,255,255,.14);color:#fff;font-size:16px;display:grid;place-items:center;
+}
+.chunk button:active{background:rgba(255,255,255,.3)}
+
+/* ---------- botones ---------- */
+.btn{
+  width:100%;border:0;cursor:pointer;border-radius:11px;padding:15px;
+  font-family:var(--sans);font-size:16px;font-weight:600;
+  background:var(--violet);color:#fff;
+}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--muted);font-weight:500;font-size:14px;padding:12px}
+
+.rate{margin-top:4px}
+.rate p{
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 10px;text-align:center;
+}
+.rate .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.rate button{
+  border:1px solid var(--line);background:var(--surface);color:var(--ink);
+  border-radius:10px;padding:13px 6px;font-size:14px;font-family:var(--sans);cursor:pointer;
+}
+.rate button:active{background:var(--violet-soft);border-color:var(--violet)}
+
+/* ---------- fin / vacío ---------- */
+.done{text-align:center;padding:40px 0;animation:rise .4s ease}
+.done .big{font-family:var(--mono);font-size:46px;color:var(--amber);line-height:1}
+.done h2{font-size:22px;margin:16px 0 6px}
+.done p{color:var(--muted);margin:0 0 26px}
+.stat{display:flex;justify-content:center;gap:28px;margin-bottom:28px}
+.stat div{text-align:center}
+.stat b{display:block;font-family:var(--mono);font-size:22px}
+.stat span{font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+
+/* ---------- cuaderno ---------- */
+.book{margin-top:34px;border-top:1px solid var(--line);padding-top:22px}
+.book h3{
+  font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--muted);font-weight:500;margin:0 0 14px;
+}
+.book ul{list-style:none;margin:0;padding:0}
+.book li{
+  font-family:var(--mono);font-size:14px;padding:11px 0;border-bottom:1px solid var(--line);
+  display:flex;gap:10px;align-items:flex-start;
+}
+.book li:last-child{border-bottom:0}
+.book li b{color:var(--violet);font-weight:400;flex:none}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="brand"><b>Standup</b> · inglés de trabajo</div>
+    <div class="streak"><span>▲</span><i id="streakN" style="font-style:normal">0</i></div>
+  </div>
+
+  <div class="bar"><i id="bar"></i></div>
+
+  <div id="app"></div>
+
+  <div class="book" id="book" hidden>
+    <h3>Tu cuaderno</h3>
+    <ul id="bookList"></ul>
+  </div>
+
+</div>
+
+<script>
+/* =========================================================
+   1. ALMACENAMIENTO
+   Intenta localStorage; si el entorno lo bloquea, usa memoria.
+   ========================================================= */
+const Store = (()=>{
+  let mem = {};
+  let ok = false;
+  try{ localStorage.setItem('__t','1'); localStorage.removeItem('__t'); ok = true; }catch(e){ ok = false; }
+  return {
+    get(k, def){
+      try{ const v = ok ? localStorage.getItem(k) : mem[k];
+           return v == null ? def : JSON.parse(v); }catch(e){ return def; }
+    },
+    set(k, v){
+      const s = JSON.stringify(v);
+      try{ ok ? localStorage.setItem(k, s) : (mem[k] = s); }catch(e){ mem[k] = s; }
+    }
+  };
+})();
+
+/* =========================================================
+   2. CONTENIDO
+   Esto es lo único que define la app. Aquí van las 60.
+   ========================================================= */
+const LECCIONES = [
+{id:1,tipo:'descifrar',
+ escena:'Tu tech lead te escribe por Slack a media mañana.',
+ quien:'Marcus · Tech Lead',
+ mensaje:'Hey, can you take a look at the PR when you get a chance? No rush.',
+ tarea:'¿Qué significa realmente? Escríbelo en español.',
+ modelo:'Revísalo hoy. Está pidiéndolo con cortesía, no diciendo que puede esperar.',
+ matiz:'<code>No rush</code> es cortesía, no información. La expectativa real es hoy o mañana temprano. Si de verdad no hubiera prisa diría <code>whenever you get to it</code>. Regla: <em>no rush</em> = hoy. <em>Whenever</em> = esta semana.',
+ chunk:'No rush — whenever you get a chance.'},
+
+{id:2,tipo:'producir',
+ escena:'Standup de la mañana. Llevas dos días esperando unas credenciales del equipo de backend.',
+ quien:null,mensaje:null,
+ tarea:'Di que estás bloqueado, sin culpar a nadie.',
+ modelo:"I'm blocked on the payments API — waiting on credentials from the backend team.",
+ matiz:'<code>Blocked on X — waiting on Y</code> es la fórmula exacta del standup: nombra qué te frena y quién lo desbloquea, sin acusar. Evita disculparte por algo que no es tu culpa.',
+ chunk:"I'm blocked on X — waiting on Y."},
+
+{id:3,tipo:'descifrar',
+ escena:'Te comentan una línea en el code review.',
+ quien:'Priya · Reviewer',
+ mensaje:'Nit: could we rename this variable to `userCount`?',
+ tarea:'¿Qué tan grave es esto?',
+ modelo:'Es un detalle menor. No bloquea el merge, pero es buena idea hacerlo.',
+ matiz:'<code>Nit</code> (de <em>nitpick</em>) es una convención que significa "esto es menor". Es lo contrario de una crítica dura. Si fuera grave diría <code>blocking:</code>.',
+ chunk:'Nit: could we rename this?'},
+
+{id:4,tipo:'producir',
+ escena:'En una videollamada no oíste bien lo que dijo tu jefe.',
+ quien:null,mensaje:null,
+ tarea:'Pide que te lo repita.',
+ modelo:"Sorry, I didn't catch that — could you say it again?",
+ matiz:'<code>I didn\'t catch that</code> es lo que dice un nativo cuando no oyó. El error caro es decir "sorry, my English is not good": te posicionas como el débil de la llamada. Nunca menciones tu nivel de inglés.',
+ chunk:"Sorry, I didn't catch that."},
+
+{id:5,tipo:'producir',
+ escena:'Te preguntan cuánto te vas a demorar. Crees que dos días, pero no has mirado el flujo de autenticación.',
+ quien:'Sarah · PM',
+ mensaje:'How long do you think this will take?',
+ tarea:'Da una estimación honesta.',
+ modelo:"Probably two days, but I'll have a better idea once I look at the auth flow.",
+ matiz:'Da un número <em>y</em> el nivel de confianza. "I don\'t know" comunica inseguridad; un número seco te compromete. <code>I\'ll have a better idea once...</code> es lo que hacen los seniors.',
+ chunk:"I'll have a better idea once I look at X."},
+
+{id:6,tipo:'producir',
+ escena:'Es miércoles y te das cuenta de que no llegas a la entrega del viernes.',
+ quien:null,mensaje:null,
+ tarea:'Avisa. Y no llegues solo con el problema.',
+ modelo:"Heads up — I'm running behind on this. Realistically it'll be Tuesday. Want me to cut scope to hit Friday instead?",
+ matiz:'En remoto, avisar tarde es peor que demorarse. <code>Heads up</code> es la forma estándar de anticipar. Lo que convierte una mala noticia en buena impresión es ofrecer una salida.',
+ chunk:"Heads up — I'm running behind on this."},
+
+{id:7,tipo:'producir',
+ escena:'Un compañero propone una solución que va a reventar el rate limit de la API.',
+ quien:null,mensaje:null,
+ tarea:'Discrepa sin sonar agresivo.',
+ modelo:"I'm not sure that'll work — if we do that, we'd hit the rate limit. What if we cached it instead?",
+ matiz:'La fórmula para discrepar: suavizar + razón concreta + alternativa. <code>I\'m not sure that\'ll work</code> es la manera aceptada de decir "eso está mal". "No, that\'s wrong" es correcto y socialmente brutal.',
+ chunk:"I'm not sure that'll work. What if we...?"},
+
+{id:8,tipo:'descifrar',
+ escena:'Entrevista de trabajo. Te lanzan la pregunta clásica.',
+ quien:'Entrevistador',
+ mensaje:'Tell me about a challenging problem you faced.',
+ tarea:'¿Qué esperan escuchar realmente?',
+ modelo:'La estructura: situación, qué hiciste TÚ, y qué resultó. No el problema más difícil, sino cómo lo cuentas.',
+ matiz:'No miden el problema, miden cómo narras. Se espera <em>STAR</em> con énfasis en <code>I did</code>, no <code>we did</code>. El hispanohablante cuenta todo en "nosotros" por modestia y el entrevistador se queda sin saber qué hizo él.',
+ chunk:'I was responsible for... so I decided to...'},
+
+{id:9,tipo:'descifrar',
+ escena:'Propusiste una idea en el canal del equipo. Te responden esto y nadie agenda nada.',
+ quien:'Dave · Manager',
+ mensaje:"Let's circle back on this next week.",
+ tarea:'¿Qué acaba de pasar con tu idea?',
+ modelo:'La archivaron de forma educada. Si nadie agenda nada, el tema se murió.',
+ matiz:'<code>Circle back</code> sin fecha ni dueño es archivar con cortesía. Si el tema te importa, la jugada es revivirlo tú: <code>Sounds good — I\'ll add it to Monday\'s agenda.</code>',
+ chunk:"I'll add it to Monday's agenda."},
+
+{id:10,tipo:'producir',
+ escena:'El login falla en Chrome móvil con un 401 después de enviar el formulario. En escritorio funciona.',
+ quien:null,mensaje:null,
+ tarea:'Reporta el bug al equipo.',
+ modelo:'Login fails on mobile Chrome — 401 after submitting. Works on desktop. Steps to reproduce in the thread.',
+ matiz:'<code>It\'s not working</code> es la frase que más irrita a un equipo técnico porque no contiene información. Qué falla, dónde, qué error, y qué sí funciona. Nadie juzga tu gramática si tu reporte es preciso.',
+ chunk:'X fails on Y — works on Z.'},
+
+{id:11,tipo:'descifrar',
+ escena:'Abriste tu primer PR en el repo. Llega esta respuesta.',
+ quien:'Alex · Senior Dev',
+ mensaje:'LGTM 🚀',
+ tarea:'¿Qué te están diciendo?',
+ modelo:'Looks Good To Me. Aprobado, puedes hacer merge.',
+ matiz:'Aprobación total, sin reservas. Lo vas a ver todos los días y no está en ningún curso de inglés. Su primo es <code>Ship it</code>, que significa lo mismo.',
+ chunk:'LGTM — feel free to merge.'},
+
+{id:12,tipo:'producir',
+ escena:'Necesitas el viernes libre para un asunto personal.',
+ quien:null,mensaje:null,
+ tarea:'Avísale a tu equipo.',
+ modelo:"I'm planning to take Friday off — let me know if that's a problem.",
+ matiz:'En cultura laboral gringa no debes justificar un día libre. Dar explicaciones que nadie pidió te pone a pedir permiso. Informas como adulto, no suplicas.',
+ chunk:"I'm planning to take Friday off."},
+
+{id:13,tipo:'producir',
+ escena:'Viernes 5pm. Hay junta directiva el lunes y no has analizado a fondo la migración.',
+ quien:'Marcus · Tech Lead',
+ mensaje:'Quick question — do we have a rough estimate on the migration? Board meeting Monday.',
+ tarea:'Responde. Necesita un número para una diapositiva.',
+ modelo:"Rough guess: 3-4 weeks. I haven't scoped it properly yet — I can put together a proper estimate by Monday morning if that works for the board deck.",
+ matiz:'Te pidió <em>rough</em> y hay una junta. Necesita un número, no tu análisis. Decir "no sé todavía" lo deja sin nada. <code>I haven\'t scoped it properly yet</code> te protege sin dejarlo colgado.',
+ chunk:"Rough guess: X. I haven't scoped it properly yet."},
+
+{id:14,tipo:'producir',
+ escena:'Llevas dos días trabado con el render de PDF y no has dicho nada. Un compañero pregunta en el canal.',
+ quien:'Lena · Dev',
+ mensaje:'How\'s the export feature coming along?',
+ tarea:'Responde con la verdad y pide ayuda.',
+ modelo:"Slower than I hoped, honestly. I've been stuck on the PDF rendering for two days. Mind if I pick your brain for 15 min?",
+ matiz:'En equipos gringos de ingeniería estar trabado no es vergüenza; ocultarlo sí. El que dice "voy bien" dos días y luego no entrega pierde confianza. <code>Pick your brain</code> es pedir ayuda sin sonar necesitado.',
+ chunk:'Mind if I pick your brain for 15 min?'},
+
+{id:15,tipo:'producir',
+ escena:'Entrevista final. Te ofrecen menos de lo que esperabas y te da miedo perder la oferta.',
+ quien:'Recruiter',
+ mensaje:"We're thinking $4,000 a month for this role. How does that sound?",
+ tarea:'Negocia sin rechazar la oferta.',
+ modelo:"Thanks — I appreciate you sharing that. Based on my experience with React and the scope you described, I was targeting closer to $5,000. Is there any flexibility there?",
+ matiz:'Agradecer + justificar con algo concreto + tu número + preguntar por flexibilidad. <code>Is there any flexibility there?</code> abre la negociación sin cerrar la puerta. Nadie retira una oferta por eso, y en esa cultura se espera que negocies.',
+ chunk:'Is there any flexibility there?'},
+
+{id:16,tipo:'descifrar',
+ escena:'Mandaste una propuesta técnica al equipo.',
+ quien:'Priya · Staff Engineer',
+ mensaje:'Interesting approach. Have we considered the performance implications?',
+ tarea:'¿Qué te están diciendo de verdad?',
+ modelo:'Que tu propuesta tiene un problema de rendimiento y creen que no lo pensaste.',
+ matiz:'<code>Interesting</code> casi nunca significa interesante: es un colchón. Y <code>have we considered</code> usa "we" queriendo decir "you", para no exponerte en público. No piden información, señalan un hueco.',
+ chunk:"Good call — I hadn't benchmarked it."},
+
+{id:17,tipo:'producir',
+ escena:'Tu deploy de las 2pm tumbó el checkout 20 minutos. Faltó un null check en el handler de pagos. Ya está arreglado.',
+ quien:null,mensaje:null,
+ tarea:'Escribe el mensaje al canal del equipo.',
+ modelo:"Heads up: the 2pm deploy took down checkout for about 20 minutes. My mistake — I missed a null check in the payment handler. It's fixed and deployed. I'm adding a test to catch this case going forward.",
+ matiz:'El instinto latino es disculparse mucho; en equipos gringos eso suena inseguro. Se espera un post-mortem corto: qué pasó, qué lo causó, ya está resuelto, qué haces para que no se repita. <code>My mistake</code> es toda la disculpa necesaria.',
+ chunk:"My mistake — it's fixed. I'm adding a test going forward."}
+];
+
+/* =========================================================
+   3. REPETICIÓN ESPACIADA
+   Intervalos en días según cómo te fue.
+   ========================================================= */
+const HOY = () => Math.floor(Date.now()/86400000);
+const SALTO = { 1:0, 2:2, 3:4 };   // ni idea / más o menos / lo tenía
+
+function progreso(){ return Store.get('prog', {}); }
+function guardarProgreso(p){ Store.set('prog', p); }
+
+function calificar(id, nota){
+  const p = progreso();
+  const prev = p[id] || {n:0, intervalo:0};
+  let intervalo;
+  if(nota === 1) intervalo = 0;
+  else if(nota === 2) intervalo = Math.max(2, Math.round(prev.intervalo * 1.5));
+  else intervalo = Math.max(4, Math.round((prev.intervalo || 2) * 2.5));
+  p[id] = { n: prev.n + 1, intervalo, vence: HOY() + intervalo };
+  guardarProgreso(p);
+}
+
+function sesionDeHoy(){
+  const p = progreso();
+  const hoy = HOY();
+  const repasos = LECCIONES.filter(l => p[l.id] && p[l.id].vence <= hoy);
+  const nuevas  = LECCIONES.filter(l => !p[l.id]);
+  return [...repasos, ...nuevas].slice(0, 5);
+}
+
+/* ---------- racha ---------- */
+function tocarRacha(){
+  const r = Store.get('racha', {dias:0, ultimo:-1});
+  const hoy = HOY();
+  if(r.ultimo === hoy) return r.dias;
+  r.dias = (r.ultimo === hoy - 1) ? r.dias + 1 : 1;
+  r.ultimo = hoy;
+  Store.set('racha', r);
+  return r.dias;
+}
+function racha(){ return Store.get('racha', {dias:0}).dias; }
+
+/* =========================================================
+   4. INTERFAZ
+   ========================================================= */
+const app  = document.getElementById('app');
+const bar  = document.getElementById('bar');
+let cola = [], i = 0, respuesta = '';
+
+function esc(s){ return (s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function hablar(t){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(t);
+  u.lang = 'en-US'; u.rate = .88;
+  speechSynthesis.speak(u);
+}
+
+function pintarRacha(){ document.getElementById('streakN').textContent = racha(); }
+function pintarBarra(){ bar.style.width = cola.length ? (i / cola.length * 100) + '%' : '0%'; }
+
+function iniciar(){
+  cola = sesionDeHoy(); i = 0;
+  pintarRacha();
+  cola.length ? pregunta() : fin(true);
+}
+
+/* ---------- pantalla de pregunta ---------- */
+function pregunta(){
+  const l = cola[i];
+  pintarBarra();
+  app.innerHTML = `
+    <div class="card">
+      <div class="eyebrow">
+        <em>${l.tipo === 'producir' ? 'Escribe tu versión' : 'Descifra'}</em>
+        <span>${i+1} / ${cola.length}</span>
+      </div>
+      <p class="scene">${l.escena}</p>
+      ${l.mensaje ? `<div class="msg">
+          <div class="who">${esc(l.quien || '')}</div>
+          <p>${esc(l.mensaje)}</p>
+        </div>` : ''}
+      <p class="task">${l.tarea}</p>
+      <textarea id="ta" placeholder="${l.tipo === 'producir' ? 'Escribe en inglés. Aunque no estés seguro.' : 'Escribe en español lo que entendiste.'}"></textarea>
+      <div style="height:14px"></div>
+      <button class="btn" id="ver">Ver cómo suena natural</button>
+      <button class="btn ghost" id="saltar">No sé — muéstrame</button>
+    </div>`;
+  const ta = document.getElementById('ta');
+  ta.focus();
+  document.getElementById('ver').onclick    = () => { respuesta = ta.value.trim(); revelar(); };
+  document.getElementById('saltar').onclick = () => { respuesta = ''; revelar(); };
+}
+
+/* ---------- pantalla del diff (elemento firma) ---------- */
+function revelar(){
+  const l = cola[i];
+  app.innerHTML = `
+    <div class="card">
+      <div class="eyebrow"><em>Compara</em><span>${i+1} / ${cola.length}</span></div>
+      <div class="diff">
+        ${respuesta ? `<div class="side mine">
+            <div class="tag">Tu versión</div>
+            <div class="body">${esc(respuesta)}</div>
+          </div>` : ''}
+        <div class="side native">
+          <div class="tag">${l.tipo === 'producir' ? 'Cómo lo diría un nativo' : 'Lo que significa'}</div>
+          <div class="body">${esc(l.modelo)}</div>
+        </div>
+      </div>
+      <div class="why">
+        <h4>El matiz</h4>
+        <p>${l.matiz}</p>
+      </div>
+      <div class="chunk">
+        <div class="t">${esc(l.chunk)}</div>
+        <button id="say" aria-label="Escuchar">▶</button>
+      </div>
+      <div class="rate">
+        <p>¿Cómo te fue?</p>
+        <div class="row">
+          <button data-n="1">Ni idea</button>
+          <button data-n="2">Más o menos</button>
+          <button data-n="3">Lo tenía</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('say').onclick = () => hablar(l.chunk);
+  app.querySelectorAll('.rate button').forEach(b => {
+    b.onclick = () => {
+      calificar(l.id, +b.dataset.n);
+      guardarChunk(l);
+      i++;
+      i < cola.length ? pregunta() : fin(false);
+    };
+  });
+}
+
+function guardarChunk(l){
+  const c = Store.get('cuaderno', []);
+  if(!c.some(x => x.id === l.id)){ c.unshift({id:l.id, t:l.chunk}); Store.set('cuaderno', c); }
+}
+
+/* ---------- fin de sesión ---------- */
+function fin(vacia){
+  const dias = vacia ? racha() : tocarRacha();
+  const p = progreso();
+  const vistas = Object.keys(p).length;
+  bar.style.width = '100%';
+  app.innerHTML = `
+    <div class="done">
+      <div class="big">${dias}</div>
+      <h2>${vacia ? 'Nada pendiente hoy' : 'Listo por hoy'}</h2>
+      <p>${vacia ? 'Vuelve mañana: las frases regresan justo antes de que las olvides.'
+                 : 'Las que fallaste vuelven pronto. Las que sabías, más tarde.'}</p>
+      <div class="stat">
+        <div><b>${dias}</b><span>días seguidos</span></div>
+        <div><b>${vistas}</b><span>de ${LECCIONES.length} vistas</span></div>
+      </div>
+      <button class="btn ghost" id="reset">Empezar de cero</button>
+    </div>`;
+  document.getElementById('reset').onclick = () => {
+    if(confirm('Se borra tu racha y tu progreso. ¿Seguro?')){
+      Store.set('prog', {}); Store.set('racha', {dias:0, ultimo:-1}); Store.set('cuaderno', []);
+      iniciar(); pintarCuaderno();
+    }
+  };
+  pintarCuaderno();
+}
+
+function pintarCuaderno(){
+  const c = Store.get('cuaderno', []);
+  const box = document.getElementById('book');
+  const ul  = document.getElementById('bookList');
+  if(!c.length){ box.hidden = true; return; }
+  box.hidden = false;
+  ul.innerHTML = c.map(x => `<li><b>›</b><span>${esc(x.t)}</span></li>`).join('');
+  ul.querySelectorAll('li').forEach((li, k) => li.onclick = () => hablar(c[k].t));
+}
+
+/* ---------- arranque ---------- */
+iniciar();
+pintarCuaderno();
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
